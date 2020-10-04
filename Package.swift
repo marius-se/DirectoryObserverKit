@@ -7,21 +7,15 @@ let package = Package(
     products: [
         .library(
             name: "DirectoryObserverKit",
-            targets: ["DirectoryObserverKit"]),
-        .executable(
-            name: "directory-observer-kit",
-            targets: ["DirectoryObserverKitCLI"])
+            targets: ["DirectoryObserverKit"])
     ],
     dependencies: [],
     targets: [
         .target(
             name: "DirectoryObserverKit",
             dependencies: []),
-        .target(
-            name: "DirectoryObserverKitCLI",
-            dependencies: ["DirectoryObserverKit"]),
         .testTarget(
             name: "DirectoryObserverKitTests",
-            dependencies: ["DirectoryObserverKit"]),
+            dependencies: ["DirectoryObserverKit"])
     ]
 )
