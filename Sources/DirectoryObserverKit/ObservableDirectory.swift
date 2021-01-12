@@ -7,7 +7,7 @@ public class ObservableDirectory {
     }
     
     // MARK: - Properties
-    private let directoryPath: String
+    public let directoryPath: String
     private let debugMode: Bool
     
     private var isDirectory: ObjCBool = false
