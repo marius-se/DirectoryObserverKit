@@ -1,7 +1,7 @@
 import Foundation
 
-public class DirectoryObserver {
-    enum DirectoryObserverError: Error {
+public class ObservableDirectory {
+    enum ObservableDirectoryError: Error {
         case directoryNotFound
         case notADirectory
     }
@@ -9,44 +9,44 @@ public class DirectoryObserver {
     // MARK: - Properties
     private let directoryPath: String
     private let debugMode: Bool
-
+    
     private var isDirectory: ObjCBool = false
-
+    
     private var monitoredDirectoryFileDescriptor: CInt = -1
     private var directoryMonitorSource: DispatchSourceFileSystemObject?
     private let directoryMonitorDispatchQueue = DispatchQueue(
         label: "DirectoryObserverQueue",
         attributes: .concurrent
     )
-
+    
     private var isDirectoryObserverIdle: Bool {
         directoryMonitorSource == nil && monitoredDirectoryFileDescriptor == -1
     }
-
+    
     public var didChange: (() -> Void)?
-
+    
     // MARK: - Initializer
-    required public init(observeAtPath directoryPath: String,
+    required public init(directoryPath: String,
                          debugMode: Bool = false) throws {
         guard FileManager.default.fileExists(atPath: directoryPath,
                                              isDirectory: &isDirectory) else {
-            throw DirectoryObserverError.directoryNotFound
+            throw ObservableDirectoryError.directoryNotFound
         }
-
+        
         guard isDirectory.boolValue else {
-            throw DirectoryObserverError.notADirectory
+            throw ObservableDirectoryError.notADirectory
         }
-
+        
         self.directoryPath = directoryPath
         self.debugMode = debugMode
     }
-
+    
     // MARK: - Class methods
     public func startMonitoring() {
         guard isDirectoryObserverIdle else {
             return
         }
-
+        
         monitoredDirectoryFileDescriptor = open(directoryPath, O_EVTONLY)
         directoryMonitorSource = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: monitoredDirectoryFileDescriptor,
@@ -63,17 +63,17 @@ public class DirectoryObserver {
             close(self.monitoredDirectoryFileDescriptor)
             self.monitoredDirectoryFileDescriptor = -1
             self.directoryMonitorSource = nil
-            self.debugLog("[Info] DirectoryObserver stopped observing!")
+            self.debugLog("[ Info ] DirectoryObserver stopped observing!")
         })
-
-        self.debugLog("[Info] DirectoryObserver about to start observing...")
+        
+        self.debugLog("[ Info ] DirectoryObserver about to start observing...")
         directoryMonitorSource?.resume()
     }
-
+    
     public func stopMonitoring() {
         directoryMonitorSource?.cancel()
     }
-
+    
     private func debugLog(_ message: String) {
         if debugMode {
             print(message)

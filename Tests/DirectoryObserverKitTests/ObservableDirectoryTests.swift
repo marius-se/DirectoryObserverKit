@@ -1,7 +1,7 @@
 import XCTest
 import DirectoryObserverKit
 
-final class DirectoryObserverKitTests: XCTestCase {
+final class ObservableDirectoryTests: XCTestCase {
     // MARK: - Properties
     var directoryURL: URL!
 
@@ -26,7 +26,7 @@ final class DirectoryObserverKitTests: XCTestCase {
     // MARK: - Tests
     func testInitThrowsAnErrorIfDirectoryDoesNotExist() {
         let invalidURL = URL(fileURLWithPath: NSTemporaryDirectory() + UUID().uuidString)
-        XCTAssertThrowsError(try DirectoryObserver(observeAtPath: invalidURL.path))
+        XCTAssertThrowsError(try ObservableDirectory(directoryPath: invalidURL.path))
     }
 
     func testInitThrowsAnErrorIfPathPointsToAFileInsteadOfDirectory() {
@@ -34,15 +34,15 @@ final class DirectoryObserverKitTests: XCTestCase {
         FileManager.default.createFile(atPath: fileURL.path, contents: nil)
         defer { try! FileManager.default.removeItem(atPath: fileURL.path) }
 
-        XCTAssertThrowsError(try DirectoryObserver(observeAtPath: fileURL.path))
+        XCTAssertThrowsError(try ObservableDirectory(directoryPath: fileURL.path))
     }
 
     func testInitSucceedsWithCorrectPath() throws {
-        XCTAssertNoThrow(try DirectoryObserver(observeAtPath: directoryURL.path))
+        XCTAssertNoThrow(try ObservableDirectory(directoryPath: directoryURL.path))
     }
 
     func testCreatingAFileInTheObservedDirectoryTriggersDidChangeCallback() throws {
-        let directoryObserver = try DirectoryObserver(observeAtPath: directoryURL.path)
+        let directoryObserver = try ObservableDirectory(directoryPath: directoryURL.path)
         let promise = expectation(description: "Received didChange callback")
         // expectedFulfillmentCount needs to be set to two, due to a bug with  FileManager.default.createFile causing the observer to trigger twice. Creating a file by hand does NOT trigger the observer twice.
         promise.expectedFulfillmentCount = 2
@@ -60,7 +60,7 @@ final class DirectoryObserverKitTests: XCTestCase {
     }
 
     func testDeletingAFileInTheObservedDirectoryTriggersChangeCallback() throws {
-        let directoryObserver = try DirectoryObserver(observeAtPath: directoryURL.path)
+        let directoryObserver = try ObservableDirectory(directoryPath: directoryURL.path)
         let fileURL = directoryURL.appendingPathComponent("\(UUID()).txt")
         FileManager.default.createFile(
             atPath: fileURL.path,
@@ -79,7 +79,7 @@ final class DirectoryObserverKitTests: XCTestCase {
     }
 
     func testRenamingAFileInTheObservedDirectoryTriggersChangeCallback() throws {
-        let directoryObserver = try DirectoryObserver(observeAtPath: directoryURL.path)
+        let directoryObserver = try ObservableDirectory(directoryPath: directoryURL.path)
         let fileURL = directoryURL.appendingPathComponent("\(UUID()).txt")
         FileManager.default.createFile(
             atPath: fileURL.path,
